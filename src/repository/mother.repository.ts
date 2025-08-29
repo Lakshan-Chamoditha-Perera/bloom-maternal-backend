@@ -27,3 +27,8 @@ export const getMotherProfileByUserId = async (userId: string) => {
 };
 
 
+//get all mothers
+export const getAllMothers = async () => {
+    return prisma.mother.findMany();
+};
+
