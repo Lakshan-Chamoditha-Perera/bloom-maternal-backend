@@ -8,5 +8,8 @@ const AuthRouter = express.Router();
 
 AuthRouter.post("/register", register);
 AuthRouter.post("/login", login);
+AuthRouter.get("/test", (req, res) => {
+    console.log("Test Auth Middleware")
+});
 
 export default AuthRouter;

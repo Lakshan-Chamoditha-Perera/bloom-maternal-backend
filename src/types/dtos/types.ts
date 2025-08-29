@@ -1,7 +1,7 @@
-/* Enums */
+
 export enum Role {
     MOTHER = 'MOTHER',
-    DOCTOR = 'DOCTOR',
+    CLINIC_USER = 'CLINIC_USER',
 }
 
 export enum VisitStatus {
@@ -10,10 +10,3 @@ export enum VisitStatus {
     COMPLETED = 'COMPLETED',
     CANCELLED = 'CANCELLED',
 }
-
-/* Model Interfaces */
-
-
-
-
-

@@ -7,136 +7,90 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// User model for Mothers and Doctors
-model User {
-  id            String    @id @default(uuid())
-  email         String    @unique @db.VarChar(255)
-  password      String    @db.VarChar(255)
-  role          Role      @default(MOTHER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  firstName     String?   @db.VarChar(100)
-  lastName      String?   @db.VarChar(100)
-  motherProfile Mother?   // One-to-one relation for Mothers
-  doctorProfile Doctor?   // One-to-one relation for Doctors
-  clinicProfile Clinic?
-
-  @@index([email, role]) // Index for faster role-based queries
-}
-
-// Role enum for access control
 enum Role {
   MOTHER
-  DOCTOR
-  ORGANIZATION
+  CLINIC_USER
 }
 
-// Mother model for profile and pregnancy data
-model Mother {
-  id            String     @id @default(uuid())
-  userId        String     @unique
-  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dob           DateTime   @db.Date
-  nicNumber     String     @db.VarChar(20)
-  phone         String?    @db.VarChar(20) // For contact and reminders
-  address       String?    @db.Text        // For logistical tracking
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  medicalRecords MedicalRecord[] // One-to-many with MedicalRecords
-  clinicVisits  ClinicVisit[]   // One-to-many with ClinicVisits
-
-  @@index([userId]) // Index for faster lookups by user
-}
-
-// Doctor model for healthcare providers
-model Doctor {
-  id            String     @id @default(uuid())
-  userId        String     @unique
-  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  licenseNumber String     @unique @db.VarChar(50)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  clinics       ClinicDoctor[] // Many-to-many with Clinics
-  clinicVisits  ClinicVisit[]  // One-to-many with ClinicVisits
-
-  @@index([userId, licenseNumber]) // Index for faster lookups
-}
-
-// Clinic model for healthcare facilities
-model Clinic {
-  id            String     @id @default(uuid())
-  name          String     @db.VarChar(255)
-  location      String     @db.Text
-  phone         String?    @db.VarChar(20) // For contact
-  address       String?    @db.Text
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  doctors       ClinicDoctor[] // Many-to-many with Doctors
-  clinicVisits  ClinicVisit[]  // One-to-many with ClinicVisits
-  userId        String     @unique
-  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  isActive      Boolean
-  clinic_code   String     @unique
-
-  @@index([userId, name]) // Index for faster clinic searches
-}
-
-// Many-to-many relationship between Doctor and Clinic
-model ClinicDoctor {
-  doctorId      String
-  clinicId      String
-  doctor        Doctor      @relation(fields: [doctorId], references: [id], onDelete: Cascade)
-  clinic        Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
-  assignedAt    DateTime    @default(now())
-
-  @@id([doctorId, clinicId]) // Composite primary key
-  @@index([doctorId, clinicId]) // Index for faster relationship queries
-}
-
-// MedicalRecord model for Mother's health data
-model MedicalRecord {
-  id            String     @id @default(uuid())
-  motherId      String
-  mother        Mother     @relation(fields: [motherId], references: [id], onDelete: Cascade)
-  clinicVisitId String?    // Optional link to ClinicVisit
-  clinicVisit   ClinicVisit? @relation(fields: [clinicVisitId], references: [id], onDelete: SetNull)
-  bloodPressure String?    @db.VarChar(20) // Format: "systolic/diastolic"
-  weight        Float?     // In kilograms
-  sugarLevel    Float?     // Blood sugar level (mg/dL)
-  gestationalAge Int?      // Weeks
-  notes         String?    @db.Text        // Additional observations
-  recordedAt    DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-
-  @@index([motherId, recordedAt]) // Index for faster record retrieval
-}
-
-// ClinicVisit model for scheduling and tracking visits
-model ClinicVisit {
-  id            String     @id @default(uuid())
-  motherId      String
-  mother        Mother     @relation(fields: [motherId], references: [id], onDelete: Cascade)
-  clinicId      String
-  clinic        Clinic     @relation(fields: [clinicId], references: [id], onDelete: Restrict)
-  doctorId      String?
-  doctor        Doctor?    @relation(fields: [doctorId], references: [id], onDelete: SetNull)
-  visitDate     DateTime
-  status        VisitStatus @default(PENDING)
-  purpose       String?    @db.VarChar(255) // E.g., "Routine Checkup", "Emergency"
-  reminderSent  Boolean    @default(false) 
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  medicalRecords MedicalRecord[] // One-to-many with MedicalRecords
-
-  @@index([motherId, visitDate]) // Index for faster visit lookups
-  @@index([clinicId])
-  @@index([doctorId])
-}
-
-// Visit status enum
 enum VisitStatus {
   PENDING
   CONFIRMED
   COMPLETED
   CANCELLED
+}
+
+// Core auth entity for mothers & clinic staff
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique @db.VarChar(255)
+  password      String     @db.VarChar(255)
+  role          Role       @default(MOTHER)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  firstName     String?    @db.VarChar(100)
+  lastName      String?    @db.VarChar(100)
+
+  motherProfile Mother?
+  clinicVisits  ClinicVisit[] @relation("VisitProvider")
+
+  @@index([email, role])
+}
+
+// Mother profile
+model Mother {
+  id            String          @id @default(uuid())
+  userId        String          @unique
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dob           DateTime        @db.Date
+  nicNumber     String          @db.VarChar(20)
+  phone         String?         @db.VarChar(20)
+  address       String?         @db.Text
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  medicalRecords MedicalRecord[]
+  clinicVisits   ClinicVisit[]  @relation("VisitMother")
+
+  @@index([userId])
+}
+
+// Medical record for a mother
+model MedicalRecord {
+  id            String        @id @default(uuid())
+  motherId      String
+  mother        Mother        @relation(fields: [motherId], references: [id], onDelete: Cascade)
+  clinicVisitId String?
+  clinicVisit   ClinicVisit?  @relation(fields: [clinicVisitId], references: [id], onDelete: SetNull)
+
+  bloodPressure String?       @db.VarChar(20)
+  weight        Float?
+  sugarLevel    Float?
+  gestationalAge Int?
+  notes         String?       @db.Text
+  recordedAt    DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([motherId, recordedAt])
+}
+
+// Clinic visit 
+model ClinicVisit {
+  id            String        @id @default(uuid())
+  motherId      String
+  mother        Mother        @relation("VisitMother", fields: [motherId], references: [id], onDelete: Cascade)
+
+  providerId    String?
+  provider      User?         @relation("VisitProvider", fields: [providerId], references: [id], onDelete: SetNull)
+
+  visitDate     DateTime
+  status        VisitStatus   @default(PENDING)
+  purpose       String?       @db.VarChar(255)
+  reminderSent  Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  medicalRecords MedicalRecord[]
+
+  @@index([motherId, visitDate])
+  @@index([providerId])
 }

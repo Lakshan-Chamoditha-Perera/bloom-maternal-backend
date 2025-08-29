@@ -24,8 +24,8 @@ export const register = async (req: Request, res: Response) => {
 // Login
 export const login = async (req: Request, res: Response) => {
     try {
-        const { email, password } = req.body;
-        const { token } = await loginUser(email, password);
+        const { username, password } = req.body;
+        const { token } = await loginUser(username, password);
 
         const response: StandardResponse<{ token: string }> = {
             code: 200,
