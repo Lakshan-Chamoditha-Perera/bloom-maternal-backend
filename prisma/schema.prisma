@@ -12,85 +12,64 @@ enum Role {
   CLINIC_USER
 }
 
-enum VisitStatus {
-  PENDING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-}
-
-// Core auth entity for mothers & clinic staff
+/**
+ * Auth entity (covers mothers & clinic staff)
+ * A Mother is a specialized profile for a User.
+ */
 model User {
-  id            String     @id @default(uuid())
-  email         String     @unique @db.VarChar(255)
-  password      String     @db.VarChar(255)
-  role          Role       @default(MOTHER)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  firstName     String?    @db.VarChar(100)
-  lastName      String?    @db.VarChar(100)
+  id         String    @id @default(uuid())
+  email      String    @unique @db.VarChar(255)
+  password   String    @db.VarChar(255)
+  role       Role      @default(MOTHER)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  firstName  String?   @db.VarChar(100)
+  lastName   String?   @db.VarChar(100)
 
+  // 1–1 with Mother
   motherProfile Mother?
-  clinicVisits  ClinicVisit[] @relation("VisitProvider")
 
   @@index([email, role])
 }
 
-// Mother profile
+/**
+ * Mother profile (1–1 with User)
+ */
 model Mother {
-  id            String          @id @default(uuid())
-  userId        String          @unique
-  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dob           DateTime        @db.Date
-  nicNumber     String          @db.VarChar(20)
-  phone         String?         @db.VarChar(20)
-  address       String?         @db.Text
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id              String           @id @default(uuid())
+  userId          String           @unique
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  medicalRecords MedicalRecord[]
-  clinicVisits   ClinicVisit[]  @relation("VisitMother")
+  dob             DateTime         @db.Date
+  nicNumber       String           @unique @db.VarChar(20)
+  phone           String?          @db.VarChar(20)
+  address         String?          @db.Text
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // 1:M medical records
+  medicalRecords  MedicalRecord[]
 
   @@index([userId])
 }
 
-// Medical record for a mother
+/**
+ * Medical data recorded for a specific Mother (M:1)
+ */
 model MedicalRecord {
-  id            String        @id @default(uuid())
-  motherId      String
-  mother        Mother        @relation(fields: [motherId], references: [id], onDelete: Cascade)
-  clinicVisitId String?
-  clinicVisit   ClinicVisit?  @relation(fields: [clinicVisitId], references: [id], onDelete: SetNull)
+  id              String     @id @default(uuid())
+  bloodPressure   Float?    
+  weight          Float?
+  sugarLevel      Float?
+  gestationalAge  Int?
+  notes           String?    @db.Text
+  recordedAt      DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
-  bloodPressure String?       @db.VarChar(20)
-  weight        Float?
-  sugarLevel    Float?
-  gestationalAge Int?
-  notes         String?       @db.Text
-  recordedAt    DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  // FK to Mother
+  motherId        String
+  mother          Mother     @relation(fields: [motherId], references: [id], onDelete: Cascade)
 
-  @@index([motherId, recordedAt])
-}
-
-// Clinic visit 
-model ClinicVisit {
-  id            String        @id @default(uuid())
-  motherId      String
-  mother        Mother        @relation("VisitMother", fields: [motherId], references: [id], onDelete: Cascade)
-
-  providerId    String?
-  provider      User?         @relation("VisitProvider", fields: [providerId], references: [id], onDelete: SetNull)
-
-  visitDate     DateTime
-  status        VisitStatus   @default(PENDING)
-  purpose       String?       @db.VarChar(255)
-  reminderSent  Boolean       @default(false)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  medicalRecords MedicalRecord[]
-
-  @@index([motherId, visitDate])
-  @@index([providerId])
+  @@index([motherId])
+  @@index([recordedAt])
 }

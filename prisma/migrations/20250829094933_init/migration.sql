@@ -26,6 +26,7 @@ CREATE TABLE `Mother` (
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `Mother_userId_key`(`userId`),
+    UNIQUE INDEX `Mother_nicNumber_key`(`nicNumber`),
     INDEX `Mother_userId_idx`(`userId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -33,34 +34,17 @@ CREATE TABLE `Mother` (
 -- CreateTable
 CREATE TABLE `MedicalRecord` (
     `id` VARCHAR(191) NOT NULL,
-    `motherId` VARCHAR(191) NOT NULL,
-    `clinicVisitId` VARCHAR(191) NULL,
-    `bloodPressure` VARCHAR(20) NULL,
+    `bloodPressure` DOUBLE NULL,
     `weight` DOUBLE NULL,
     `sugarLevel` DOUBLE NULL,
     `gestationalAge` INTEGER NULL,
     `notes` TEXT NULL,
     `recordedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-
-    INDEX `MedicalRecord_motherId_recordedAt_idx`(`motherId`, `recordedAt`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `ClinicVisit` (
-    `id` VARCHAR(191) NOT NULL,
     `motherId` VARCHAR(191) NOT NULL,
-    `providerId` VARCHAR(191) NULL,
-    `visitDate` DATETIME(3) NOT NULL,
-    `status` ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
-    `purpose` VARCHAR(255) NULL,
-    `reminderSent` BOOLEAN NOT NULL DEFAULT false,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
 
-    INDEX `ClinicVisit_motherId_visitDate_idx`(`motherId`, `visitDate`),
-    INDEX `ClinicVisit_providerId_idx`(`providerId`),
+    INDEX `MedicalRecord_motherId_idx`(`motherId`),
+    INDEX `MedicalRecord_recordedAt_idx`(`recordedAt`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -69,12 +53,3 @@ ALTER TABLE `Mother` ADD CONSTRAINT `Mother_userId_fkey` FOREIGN KEY (`userId`) 
 
 -- AddForeignKey
 ALTER TABLE `MedicalRecord` ADD CONSTRAINT `MedicalRecord_motherId_fkey` FOREIGN KEY (`motherId`) REFERENCES `Mother`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `MedicalRecord` ADD CONSTRAINT `MedicalRecord_clinicVisitId_fkey` FOREIGN KEY (`clinicVisitId`) REFERENCES `ClinicVisit`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `ClinicVisit` ADD CONSTRAINT `ClinicVisit_motherId_fkey` FOREIGN KEY (`motherId`) REFERENCES `Mother`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `ClinicVisit` ADD CONSTRAINT `ClinicVisit_providerId_fkey` FOREIGN KEY (`providerId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
