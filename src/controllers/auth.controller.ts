@@ -25,12 +25,12 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
     try {
         const { username, password } = req.body;
-        const { token } = await loginUser(username, password);
+        const { token, userRole } = await loginUser(username, password);
 
-        const response: StandardResponse<{ token: string }> = {
+        const response: StandardResponse<{ token: string, userRole: string }> = {
             code: 200,
             message: "Login successful",
-            data: { token },
+            data: { token, userRole },
         };
         res.status(200).json(response);
     } catch (err: any) {

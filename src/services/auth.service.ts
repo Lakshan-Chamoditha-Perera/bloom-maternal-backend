@@ -92,7 +92,7 @@ export const loginUser = async (email: string, password: string) => {
         });
 
         console.log("[loginUser] Token generated successfully");
-        return { token };
+        return { token, userRole: user.role };
     } catch (error) {
         console.error("[loginUser] Error occurred:", error);
         throw error;
