@@ -1,15 +1,13 @@
 import { Request, Response } from "express";
 import {
-    createMedicalRecord,
-    getMedicalRecordsByMotherId,
-    updateMedicalRecord,
-    deleteMedicalRecord
+    MedicleRecordService
 } from "../services/medicleRecord.service";
 import { StandardResponse } from "../types/payloads/StandardRespons";
 
 export type MedicleRecord = {
     bloodPressure: number;
     weight: number;
+    height: number;
     sugarLevel: number;
     gestationalAge: number;
     notes: string;
@@ -19,11 +17,13 @@ export type MedicleRecord = {
     updatedAt?: Date;
 }
 
+const medicleRecordService = new MedicleRecordService();
+
 // Create a new medical record
 export const createMedicalRecordController = async (req: Request, res: Response) => {
     try {
         const medicleRecordData: MedicleRecord = req.body;
-        const newRecord = await createMedicalRecord(medicleRecordData);
+        const newRecord = await medicleRecordService.createMedicalRecord(medicleRecordData);
         const response: StandardResponse<MedicleRecord> = {
             code: 201,
             message: "Medical record created successfully",
@@ -43,7 +43,7 @@ export const createMedicalRecordController = async (req: Request, res: Response)
 export const getMedicalRecordsByMotherIdController = async (req: Request, res: Response) => {
     try {
         const { motherId } = req.params;
-        const records = await getMedicalRecordsByMotherId(motherId);
+        const records = await medicleRecordService.getMedicalRecordsByMotherId(motherId);
         const response: StandardResponse<MedicleRecord[]> = {
             code: 200,
             message: "Medical records fetched successfully",
@@ -64,7 +64,7 @@ export const updateMedicalRecordController = async (req: Request, res: Response)
     try {
         const { id } = req.params;
         const updateData: Partial<MedicleRecord> = req.body;
-        const updatedRecord = await updateMedicalRecord(id, updateData);
+        const updatedRecord = await medicleRecordService.updateMedicalRecord(id, updateData);
         const response: StandardResponse<MedicleRecord> = {
             code: 200,
             message: "Medical record updated successfully",
@@ -84,7 +84,7 @@ export const updateMedicalRecordController = async (req: Request, res: Response)
 export const deleteMedicalRecordController = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        await deleteMedicalRecord(id);
+        await medicleRecordService.deleteMedicalRecord(id);
         const response: StandardResponse<null> = {
             code: 200,
             message: "Medical record deleted successfully",
@@ -98,4 +98,27 @@ export const deleteMedicalRecordController = async (req: Request, res: Response)
         };
         res.status(400).json(errorResponse);
     }
+}
+
+// Get All medicle records with mother
+export const getAllMedicleRecordsWithMotherController = async (req: Request, res: Response) => {
+    try {
+        const records = await medicleRecordService.getAllMedicleRecordsWithMother();
+        const response: StandardResponse<any> = {
+            code: 200,
+            message: "Medicle records with mother fetched successfully",
+            data: records
+        };
+        res.status(200).json(response);
+    } catch (err: any) {
+        const errorResponse: StandardResponse<null> = {
+            code: 400,
+            message: "Medicle records with mother fetch failed"
+        };
+        res.status(400).json(errorResponse);
+    }
+}
+
+export const createMedicalRecordAndPredictController = async (req: Request, res: Response) => { 
+    
 }
