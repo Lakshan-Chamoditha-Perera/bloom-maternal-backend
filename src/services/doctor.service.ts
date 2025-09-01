@@ -1,4 +1,5 @@
 
+import { getAllMedicleRecordsWithMother } from "../repository/medicleRecord.repository";
 import { getAllMothersCount, getAvgBp, getAvgSuger, getHighestRiskMedicleRecordsWithMother } from "../repository/mother.repository";
 import { MotherService } from "./mother.service";
 
@@ -21,7 +22,7 @@ export class DoctorService {
             const avgSugar = await getAvgSuger();
 
             // medical records with mother desc by date
-            const medicalRecordsWithMother = await getHighestRiskMedicleRecordsWithMother();
+            const medicalRecordsWithMother = await getAllMedicleRecordsWithMother();
 
             return {
                 totalMothersCount,
