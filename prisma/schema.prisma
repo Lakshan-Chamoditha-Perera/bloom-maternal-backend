@@ -60,11 +60,13 @@ model MedicalRecord {
   id              String     @id @default(uuid())
   bloodPressure   Float?    
   weight          Float?
+  height          Float?
   sugarLevel      Float?
   gestationalAge  Int?
   notes           String?    @db.Text
   recordedAt      DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
+  risk String
 
   // FK to Mother
   motherId        String
