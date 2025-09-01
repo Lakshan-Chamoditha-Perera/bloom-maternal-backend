@@ -37,3 +37,52 @@ export const findMotherById = async (id: string) => {
     return prisma.mother.findUnique({ where: { id } });
 };
 
+
+//get all mothers count
+export const getAllMothersCount = async () => {
+    return prisma.mother.count();
+};
+
+//get highest risk mothers
+export const getHighestRiskMedicleRecordsWithMother = async () => {
+    return prisma.medicalRecord.findMany({
+        where: {
+            risk: "high"
+        },
+        include: {
+            mother: {
+                include: {
+                    user: {
+                        select: {
+                            firstName: true,
+                            lastName: true,
+                            email: true
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: {
+            recordedAt: "desc" // newest first
+        }
+    });
+};
+
+
+// get avg bp
+export const getAvgBp = async () => {
+    return prisma.medicalRecord.aggregate({
+        _avg: {
+            bloodPressure: true
+        }
+    });
+};
+
+
+export const getAvgSuger = async () => {
+    return prisma.medicalRecord.aggregate({
+        _avg: {
+            sugarLevel: true
+        }
+    });
+};
