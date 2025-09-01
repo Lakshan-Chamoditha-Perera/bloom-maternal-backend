@@ -35,6 +35,7 @@ const timeout = Number(process.env.PREDICT_API_TIMEOUT_MS || 4000);
 
 export class PredictorClient {
     async predict(input: PredictRequest): Promise<PredictResponse> {
+        console.log("[PredictorClient:predict] Predicting...");
         const res = await axios.post<PredictResponse>(`${baseURL}/predict`, input, {
             timeout,
             headers: { "Content-Type": "application/json" },

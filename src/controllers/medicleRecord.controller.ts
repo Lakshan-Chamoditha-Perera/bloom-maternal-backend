@@ -15,6 +15,7 @@ export type MedicleRecord = {
     id?: string;
     createdAt?: Date;
     updatedAt?: Date;
+    risk?: string;
 }
 
 const medicleRecordService = new MedicleRecordService();
@@ -119,6 +120,55 @@ export const getAllMedicleRecordsWithMotherController = async (req: Request, res
     }
 }
 
-export const createMedicalRecordAndPredictController = async (req: Request, res: Response) => { 
-    
-}
+
+export const createMedicalRecordAndPredictController = async (req: Request, res: Response) => {
+    console.log("[MedicalRecordController:createMedicalRecordAndPredict] Incoming request");
+
+    const numOrNull = (v: any) => {
+        if (v === undefined || v === null || v === "") return null;
+        const n = Number(v);
+        return Number.isNaN(n) ? null : n;
+    };
+
+    try {
+        const motherId = (req.params as any).motherId ?? (req.body?.motherId as string | undefined);
+        if (!motherId) {
+            const errorResp: StandardResponse<null> = {
+                code: 400,
+                message: "motherId is required (as path param or in body)",
+                data: null,
+            };
+            res.status(400).json(errorResp);
+            return;
+        }
+
+        const dto = {
+            motherId,
+            height: numOrNull(req.body?.height),
+            weight: numOrNull(req.body?.weight),
+            bloodPressure: numOrNull(req.body?.bloodPressure),
+            sugarLevel: numOrNull(req.body?.sugarLevel),
+            gestationalAge: numOrNull(req.body?.gestationalAge),
+            notes: req.body?.notes ?? null,
+            bpStr: req.body?.bpStr,                 // e.g., "110/70"
+            age: numOrNull(req.body?.age) ?? undefined,
+        };
+
+        const result = await medicleRecordService.createMedicalRecordAndPredict(dto);
+
+        const response: StandardResponse<any> = {
+            code: 201,
+            message: "Medical record created with prediction",
+            data: result, // { record, prediction }
+        };
+        res.status(201).json(response);
+    } catch (err: any) {
+        console.error("[MedicalRecordController:createMedicalRecordAndPredict] Error:", err?.message || err);
+        const errorResp: StandardResponse<null> = {
+            code: 400,
+            message: err?.message || "Failed to create medical record with prediction",
+            data: null,
+        };
+        res.status(400).json(errorResp);
+    }
+};

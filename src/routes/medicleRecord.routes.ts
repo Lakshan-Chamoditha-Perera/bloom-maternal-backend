@@ -4,7 +4,8 @@ import {
     getMedicalRecordsByMotherIdController,
     updateMedicalRecordController,
     deleteMedicalRecordController,
-    getAllMedicleRecordsWithMotherController
+    getAllMedicleRecordsWithMotherController,
+    createMedicalRecordAndPredictController
 } from "../controllers/medicleRecord.controller";
 
 const MedicleRecordsRouter = Router();
@@ -23,5 +24,8 @@ MedicleRecordsRouter.delete("/:id", deleteMedicalRecordController);
 
 // Get All medicle records with mother
 MedicleRecordsRouter.get("/all", getAllMedicleRecordsWithMotherController);
+
+// Create a new medical record and predict risk
+MedicleRecordsRouter.post("/predict", createMedicalRecordAndPredictController);
 
 export default MedicleRecordsRouter;
