@@ -3,7 +3,8 @@ import {
     createMedicalRecordController,
     getMedicalRecordsByMotherIdController,
     updateMedicalRecordController,
-    deleteMedicalRecordController
+    deleteMedicalRecordController,
+    getAllMedicleRecordsWithMotherController
 } from "../controllers/medicleRecord.controller";
 
 const MedicleRecordsRouter = Router();
@@ -19,5 +20,8 @@ MedicleRecordsRouter.put("/:id", updateMedicalRecordController);
 
 // Delete medical record by ID
 MedicleRecordsRouter.delete("/:id", deleteMedicalRecordController);
+
+// Get All medicle records with mother
+MedicleRecordsRouter.get("/all", getAllMedicleRecordsWithMotherController);
 
 export default MedicleRecordsRouter;

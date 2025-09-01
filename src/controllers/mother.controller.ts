@@ -1,12 +1,15 @@
 import { Request, Response } from "express";
 import { StandardResponse } from "../types/payloads/StandardRespons";
-import { getAllMothersList, getMotherByUserId } from "../services/mother.service";
+import { MotherService } from "../services/mother.service";
+
+
+const motherService = new MotherService();
 
 
 // get all mothers
 export const getAllMothers = async (req: Request, res: Response) => {
     try {
-        const motherslist: any = await getAllMothersList();
+        const motherslist: any = await motherService.getAllMothersList();
         const response: StandardResponse<any> = {
             code: 200,
             message: "Mothers list fetched successfully",
@@ -26,7 +29,7 @@ export const getAllMothers = async (req: Request, res: Response) => {
 export const getMotherProfileById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const motherProfile: any = await getMotherByUserId(id);
+        const motherProfile: any = await motherService.getMotherByUserId(id);
         const response: StandardResponse<any> = {
             code: 200,
             message: "Mother profile fetched successfully",

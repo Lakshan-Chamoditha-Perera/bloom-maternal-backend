@@ -32,3 +32,8 @@ export const getAllMothers = async () => {
     return prisma.mother.findMany();
 };
 
+// find mother by id
+export const findMotherById = async (id: string) => {
+    return prisma.mother.findUnique({ where: { id } });
+};
+
