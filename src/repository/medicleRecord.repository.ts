@@ -7,6 +7,7 @@ export const createMedicleRecord = async (medicleRecord: any) => {
         data: {
             bloodPressure: medicleRecord.bloodPressure,
             weight: medicleRecord.weight,
+            height: medicleRecord.height,
             sugarLevel: medicleRecord.sugarLevel,
             gestationalAge: medicleRecord.gestationalAge,
             notes: medicleRecord.notes,
@@ -43,9 +44,19 @@ export const updateMedicleRecordById = async (id: string, medicleRecord: any) =>
         data: {
             bloodPressure: medicleRecord.bloodPressure ?? 0,
             weight: medicleRecord.weight,
+            height: medicleRecord.height,
             sugarLevel: medicleRecord.sugarLevel,
             gestationalAge: medicleRecord.gestationalAge,
         }
     })
 }
 
+
+// Get all medicle records with mother 
+export const getAllMedicleRecordsWithMother = async () => {
+    return prisma.medicalRecord.findMany({
+        include: {
+            mother: true
+        }
+    })
+}
