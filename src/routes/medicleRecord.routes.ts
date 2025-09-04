@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {
-    createMedicalRecordController,
     getMedicalRecordsByMotherIdController,
     updateMedicalRecordController,
     deleteMedicalRecordController,
@@ -9,9 +8,6 @@ import {
 } from "../controllers/medicleRecord.controller";
 
 const MedicleRecordsRouter = Router();
-
-// Create a new medical record
-MedicleRecordsRouter.post("/", createMedicalRecordController);
 
 // Get medical records by mother ID
 MedicleRecordsRouter.get("/mother/:motherId", getMedicalRecordsByMotherIdController);

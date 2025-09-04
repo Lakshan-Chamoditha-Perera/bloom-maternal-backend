@@ -16,29 +16,12 @@ export type MedicleRecord = {
     createdAt?: Date;
     updatedAt?: Date;
     risk?: string;
+    motherNIc?: string;
 }
 
 const medicleRecordService = new MedicleRecordService();
 
-// Create a new medical record
-export const createMedicalRecordController = async (req: Request, res: Response) => {
-    try {
-        const medicleRecordData: MedicleRecord = req.body;
-        const newRecord = await medicleRecordService.createMedicalRecord(medicleRecordData);
-        const response: StandardResponse<MedicleRecord> = {
-            code: 201,
-            message: "Medical record created successfully",
-            data: newRecord
-        };
-        res.status(201).json(response);
-    } catch (err: any) {
-        const errorResponse: StandardResponse<null> = {
-            code: 400,
-            message: err.message || "Medical record creation failed"
-        };
-        res.status(400).json(errorResponse);
-    }
-}
+
 
 // Get medical records by mother ID
 export const getMedicalRecordsByMotherIdController = async (req: Request, res: Response) => {
@@ -131,11 +114,11 @@ export const createMedicalRecordAndPredictController = async (req: Request, res:
     };
 
     try {
-        const motherId = (req.params as any).motherId ?? (req.body?.motherId as string | undefined);
-        if (!motherId) {
+        const motherNic = (req.params as any).motherId ?? (req.body?.motherNic as string | undefined);
+        if (!motherNic) {
             const errorResp: StandardResponse<null> = {
                 code: 400,
-                message: "motherId is required (as path param or in body)",
+                message: "mother nic is required (as path param or in body)",
                 data: null,
             };
             res.status(400).json(errorResp);
@@ -143,7 +126,7 @@ export const createMedicalRecordAndPredictController = async (req: Request, res:
         }
 
         const dto = {
-            motherId,
+            motherNic,
             height: numOrNull(req.body?.height),
             weight: numOrNull(req.body?.weight),
             bloodPressure: numOrNull(req.body?.bloodPressure),
@@ -152,6 +135,7 @@ export const createMedicalRecordAndPredictController = async (req: Request, res:
             notes: req.body?.notes ?? null,
             bpStr: req.body?.bpStr,                 // e.g., "110/70"
             age: numOrNull(req.body?.age) ?? undefined,
+            isSaving: req.body?.isSaving ?? false,
         };
 
         const result = await medicleRecordService.createMedicalRecordAndPredict(dto);

@@ -8,30 +8,12 @@ import {
     updateMedicleRecordById,
     getAllMedicleRecordsWithMother
 } from "../repository/medicleRecord.repository";
-import { findMotherById } from "../repository/mother.repository";
+import { findMotherById, findMotherByNic } from "../repository/mother.repository";
 
 export class MedicleRecordService {
 
     // Dependencies
     private predictor = new PredictorClient();
-
-
-    /**
-     * Create medical record for a mother
-     * @param medicleRecordData
-     */
-    async createMedicalRecord(medicleRecordData: MedicleRecord) {
-        console.log("[MotherService:createMedicalRecord] Incoming");
-        try {
-            const motherExists = await findMotherById(medicleRecordData.motherId);
-            if (!motherExists) {
-                throw new Error("Mother not found");
-            }
-            return await createMedicleRecord(medicleRecordData);
-        } catch (err: any) {
-            throw new Error(err.message);
-        }
-    }
 
     /**
      * Get medical records by mother ID
@@ -91,9 +73,9 @@ export class MedicleRecordService {
 
         try {
             // 1) Validate mother
-            const mother = await findMotherById(dto.motherId);
+            const mother = await findMotherByNic(dto.motherNic);
             if (!mother) {
-                console.error("[MedicleRecordService:createMedicalRecordAndPredict] Mother not found:", dto.motherId);
+                console.error("[MedicleRecordService:createMedicalRecordAndPredict] Mother not found:", dto.motherNic);
                 throw new Error("Mother not found");
             }
 
@@ -137,27 +119,29 @@ export class MedicleRecordService {
             };
             const risk = normalize(pr?.data?.predicted_label);
 
+            let data = {};
             // 6) Persist record with predicted risk
-            const created = await createMedicleRecord({
-                bloodPressure: dto.bloodPressure ?? null,
-                weight: dto.weight ?? null,
-                height: dto.height ?? null,
-                sugarLevel: dto.sugarLevel ?? null,
-                gestationalAge: dto.gestationalAge ?? null,
-                notes: dto.notes ?? null,
-                motherId: dto.motherId,
-                risk, // <-- persist predicted risk at creation time
-            });
+            if (dto.isSaving === true) {
+                const { id } = await createMedicleRecord({
+                    bloodPressure: dto.bloodPressure ?? null,
+                    weight: dto.weight ?? null,
+                    height: dto.height ?? null,
+                    sugarLevel: dto.sugarLevel ?? null,
+                    gestationalAge: dto.gestationalAge ?? null,
+                    notes: dto.notes ?? null,
+                    motherId: mother.id,
+                    motherNic: mother.nicNumber,
+                    risk, // <-- persist predicted risk at creation time
+                });
 
-            console.log(
-                "[MedicleRecordService:createMedicalRecordAndPredict] Created record with risk:",
-                created.id,
-                created.risk
-            );
+                data = {
+                    id
+                }
+            }
 
             // 7) Return persisted record + prediction details for UI (optional)
             return {
-                record: created,
+                record: { ...data, risk },
                 prediction: {
                     riskLabel: risk,
                     predictedProba: pr?.data?.predicted_proba,

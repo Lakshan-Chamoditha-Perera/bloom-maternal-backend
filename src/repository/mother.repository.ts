@@ -15,7 +15,6 @@ export const createMotherProfile = async (mother: MotherDto) => {
     });
 };
 
-
 // get mother profile by id
 export const getMotherProfileById = async (id: string) => {
     return prisma.mother.findUnique({ where: { id } });
@@ -25,7 +24,6 @@ export const getMotherProfileById = async (id: string) => {
 export const getMotherProfileByUserId = async (userId: string) => {
     return prisma.mother.findUnique({ where: { userId } });
 };
-
 
 //get all mothers
 export const getAllMothers = async () => {
@@ -37,6 +35,9 @@ export const findMotherById = async (id: string) => {
     return prisma.mother.findUnique({ where: { id } });
 };
 
+export const findMotherByNic = async (nic: string) => {
+    return prisma.mother.findUnique({ where: { nicNumber: nic } });
+};
 
 //get all mothers count
 export const getAllMothersCount = async () => {
